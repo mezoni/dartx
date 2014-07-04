@@ -176,7 +176,7 @@ class DartX {
     }
 
     return _runScript().then((result) {
-      //_deleteTemporaryDirectory();
+      _deleteTemporaryDirectory();
       _exitCode = result;
       return _exitCode;
     });
