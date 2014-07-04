@@ -1,1 +1,0 @@
-"%DART_SDK%/bin/dart" dartx.dart %*
