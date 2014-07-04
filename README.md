@@ -11,7 +11,6 @@ Example of `command-line script` (example/serve.dart):
 
 ```dart
 /*
-/*
 @pubspec.yaml
 name: serve
 description: A sample static server
