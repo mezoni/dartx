@@ -36,6 +36,12 @@ void main() {
     print("Static web server (shelf)");
     print("Url: $url");
     print("Path: $path");
+    print("Press <ENTER> to exit");
+    stdin.listen((data) {
+      server.close(force: true);
+      exit(0);
+    });
+
     Timer.run(() => runBrowser(url));
   });
 }
