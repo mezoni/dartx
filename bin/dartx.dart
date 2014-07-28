@@ -23,7 +23,7 @@ class DartX {
 
   void _createLinkToLibDirectory() {
     var directory = new Directory("lib");
-    if(directory.existsSync()) {
+    if (directory.existsSync()) {
       var link = new Link(_temporaryDirectory + "/lib");
       link.createSync(directory.absolute.path);
     }
@@ -40,6 +40,15 @@ class DartX {
 
   void _deleteTemporaryDirectory() {
     var directory = new Directory(_temporaryDirectory);
+    for (var file in directory.listSync(recursive: true, followLinks: false)) {
+      if (file is Link) {
+        try {
+          file.deleteSync();
+        } catch (s) {
+        }
+      }
+    }
+
     directory.deleteSync(recursive: true);
   }
 
