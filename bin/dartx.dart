@@ -53,7 +53,26 @@ class DartX {
   }
 
   void _findDartSdk() {
-    _dartSdk = Platform.environment["DART_SDK"];
+    var executable = Platform.executable;
+    var s = Platform.pathSeparator;
+    if (!executable.contains(s)) {
+      if (Platform.isLinux) {
+        executable = new Link("/proc/$pid/exe").resolveSymbolicLinksSync();
+      }
+    }
+
+    var file = new File(executable);
+    if (file.existsSync()) {
+      var parent = file.absolute.parent;
+      parent = parent.parent;
+      var path = parent.path;
+      var dartAPI = "$path${s}include${s}dart_api.h";
+      if (new File(dartAPI).existsSync()) {
+        _dartSdk = path;
+        return;
+      }
+    }
+
     if (_dartSdk == null) {
       print("Dart SDK not found.");
       _exitCode = -1;
