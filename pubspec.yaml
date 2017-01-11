@@ -1,5 +1,5 @@
 name: dartx
-version: 0.0.6
+version: 0.0.8
 author: Andrew Mezoni <andrew.mezoni@gmail.com>
 description: The main purpose of `dartx` is that it allows easy to execute special standalone command-line scripts at any place. These scripts can to require for their operation other packages (uses import directives). They will be executed without requirements manually to install these dependent packages.
 homepage: https://github.com/mezoni/dartx

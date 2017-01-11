@@ -1,20 +1,28 @@
 import "dart:async";
 import "dart:io";
 
-void main(List<String> args) {
-  new DartX().run(args).then((exitCode) {
-    exit(exitCode);
-  });
+Future<int> main(List<String> args) async {
+  var dartx = new DartX();
+  var exitCode = await dartx.run(args);
+  exit(exitCode);
+  return exitCode;
 }
 
 class DartX {
   List<String> _arguments;
+
   String _dartSdk;
+
   int _exitCode;
+
   String _pubspec;
+
   String _script;
+
   String _temporaryDirectory;
+
   bool _verbose;
+
   String _workingDirectory;
 
   Future<int> run(List<String> arguments) {
@@ -44,8 +52,7 @@ class DartX {
       if (file is Link) {
         try {
           file.deleteSync();
-        } catch (s) {
-        }
+        } catch (s) {}
       }
     }
 
@@ -95,7 +102,6 @@ class DartX {
               _exitCode = -1;
               break;
           }
-
         } else {
           _script = argument;
           _arguments = new List<String>();
@@ -168,26 +174,26 @@ class DartX {
     _workingDirectory = Directory.current.path;
   }
 
-  Future<int> _run(List<String> arguments) {
+  Future<int> _run(List<String> arguments) async {
     if (arguments.isEmpty) {
       _printUsage();
-      return new Future.value(0);
+      return 0;
     }
 
     _reset();
     _parseArguments(arguments);
     if (_exitCode != 0) {
-      return new Future.value(_exitCode);
+      return _exitCode;
     }
 
     _findDartSdk();
     if (_exitCode != 0) {
-      return new Future.value(_exitCode);
+      return _exitCode;
     }
 
     _parseScript();
     if (_exitCode != 0) {
-      return new Future.value(_exitCode);
+      return _exitCode;
     }
 
     _createTemporaryDirectory();
@@ -199,41 +205,35 @@ class DartX {
       print(result.stdout);
       if (result.exitCode != 0) {
         _exitCode = -1;
-        return new Future.value(_exitCode);
+        return _exitCode;
       }
     }
 
-    return _runScript().then((result) {
-      _deleteTemporaryDirectory();
-      _exitCode = result;
-      return _exitCode;
-    });
+    var exitCode = await _runScript();
+    _deleteTemporaryDirectory();
+    _exitCode = exitCode;
+    return _exitCode;
   }
 
   ProcessResult _runPub(List<String> arguments, {String workingDirectory}) {
     var executable = _dartSdk + "/bin/pub";
-    return Process.runSync(executable, arguments, runInShell: true,
-        workingDirectory: workingDirectory);
+    return Process.runSync(executable, arguments,
+        runInShell: true, workingDirectory: workingDirectory);
   }
 
-  Future<int> _runScript() {
+  Future<int> _runScript() async {
     var vmArguments = <String>[];
     vmArguments.add("--checked");
-    vmArguments.addAll(["--package-root=$_temporaryDirectory/packages"]);
+    //vmArguments.addAll(["--package-root=$_temporaryDirectory/packages"]);
+    vmArguments.addAll(["--packages=$_temporaryDirectory/.packages"]);
     vmArguments.add(_script);
     vmArguments.addAll(_arguments);
-    return Process.start(Platform.executable, vmArguments, workingDirectory:
-        _workingDirectory).then((process) {
-      process.stderr.pipe(stderr);
-      process.stdout.pipe(stdout);
-      stdin.pipe(process.stdin);
-      return process.exitCode.then((exitCode) {
-        return exitCode;
-      });
-    });
-  }
-}
-     });
-    });
+    var process = await Process.start(Platform.executable, vmArguments,
+        workingDirectory: _workingDirectory);
+    process.stderr.pipe(stderr);
+    process.stdout.pipe(stdout);
+    stdin.pipe(process.stdin);
+    var exitCode = process.exitCode;
+    return exitCode;
   }
 }
